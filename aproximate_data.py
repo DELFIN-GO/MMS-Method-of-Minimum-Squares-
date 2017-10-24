@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def f(a):
-    return [a[0], a[1], 0, 0]
+def users_func(arr):
+    return [arr[0], arr[1], 0, 0]
 
 
 data = open("input.txt")
@@ -13,7 +13,7 @@ input_data = [[float(i) for i in line.split()]
               for line in data.read().split("\n")
               if len(line) != 0]
 
-calculated_input = [f(cur_x_y) for cur_x_y in input_data]
+calculated_input = [users_func(cur_x_y) for cur_x_y in input_data]
 print_result = "\n".join([" ".join([str(i)
                                     for i in cur_xy])
                           for cur_xy in calculated_input])
@@ -24,22 +24,23 @@ data.close()
 plot_data.close()
 
 # Апроксимация(МНК)
-x = np.array(calculated_input)[:, 0]
-y = np.array(calculated_input)[:, 1]
-k = int(input("Enter the polinomial power: "))
+Aproximate_data_x = np.array(calculated_input)[:, 0]
+Aproximate_data_y = np.array(calculated_input)[:, 1]
+polinomial_power = int(input("Enter the polinomial power: "))
 
-Aproximate_lin_sys_A = np.array([[sum([xi ** (i + j) for xi in x])
-                                  for j in range(k + 1)]
-                                 for i in range(k + 1)])
-Aproximate_lin_sys_B = np.array([sum([y[j] * x[j] ** i for j in range(len(x))])
-                                 for i in range(k + 1)])
+Aproximate_lin_sys_A = np.array([[sum([xi ** (i + j) for xi in Aproximate_data_x])
+                                  for j in range(polinomial_power + 1)]
+                                 for i in range(polinomial_power + 1)])
+Aproximate_lin_sys_B = np.array([sum([Aproximate_data_y[j] * Aproximate_data_x[j] ** i
+                                      for j in range(len(Aproximate_data_x))])
+                                 for i in range(polinomial_power + 1)])
 polynomial_coefficients = np.linalg.solve(Aproximate_lin_sys_A, Aproximate_lin_sys_B)
 
 
-def polinomial_func(val):
-    ans = np.zeros(val.shape)
+def polinomial_func(val_arr):
+    ans = np.zeros(val_arr.shape)
     for i in range(len(polynomial_coefficients)):
-        ans += polynomial_coefficients[i] * val ** i
+        ans += polynomial_coefficients[i] * val_arr ** i
     return ans
 
 
@@ -57,10 +58,10 @@ def calc_limits(arr, limits_size=0.15):
             max_element + delta_element * limits_size)
 
 
-x_plot = np.arange(*calc_limits(x), calc_lag(x))
+x_plot = np.arange(*calc_limits(Aproximate_data_x), calc_lag(Aproximate_data_x))
 y_plot = polinomial_func(x_plot)
 
-plt.scatter(x, y)
+plt.scatter(Aproximate_data_x, Aproximate_data_y)
 plt.plot(x_plot, y_plot)
 plt.grid(True)
 
@@ -75,7 +76,7 @@ def local_max_min(arr):
                       if min(arr[i - 1], arr[i], arr[i + 1]) == arr[i]]))
 
 
-plt.xlim(*calc_limits(x))
-plt.ylim(*calc_limits(np.hstack((y, *local_max_min(y_plot)))))
+plt.xlim(*calc_limits(Aproximate_data_x))
+plt.ylim(*calc_limits(np.hstack((Aproximate_data_y, *local_max_min(y_plot)))))
 
 plt.show()
