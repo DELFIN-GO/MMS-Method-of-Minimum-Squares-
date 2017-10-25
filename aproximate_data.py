@@ -3,17 +3,27 @@ import matplotlib.pyplot as plt
 
 
 def users_func(arr):
-    return [arr[0], arr[1], 0, 0]
+    return [arr[0] ** 2, 2 * 721.3 * 39.737 * arr[1] ** 2, 0.2, 112]
 
 
 data = open("input.txt")
 plot_data = open("datafile.dat", "w")
 
-input_data = [[float(i) for i in line.split()]
+
+def convert_to_float(value_str):
+    value_arr = value_str.split("^")
+    if len(value_arr) == 1:
+        value_arr += [1]
+    return float(value_arr[0]) ** float(value_arr[1])
+
+
+input_data = [[convert_to_float(i)
+               for i in line.split() if len(i) != 0]
               for line in data.read().split("\n")
               if len(line) != 0]
 
-calculated_input = [users_func(cur_x_y) for cur_x_y in input_data]
+calculated_input = [users_func(cur_x_y)
+                    for cur_x_y in input_data]
 print_result = "\n".join([" ".join([str(i)
                                     for i in cur_xy])
                           for cur_xy in calculated_input])
@@ -26,7 +36,11 @@ plot_data.close()
 # Апроксимация(МНК)
 Aproximate_data_x = np.array(calculated_input)[:, 0]
 Aproximate_data_y = np.array(calculated_input)[:, 1]
-polinomial_power = int(input("Enter the polinomial power: "))
+polinomial_power = input("Enter the polinomial power: ")
+while not polinomial_power.isdigit():
+    print("Incorrect input")
+    polinomial_power = input("Enter the polinomial power: ")
+polinomial_power = int(polinomial_power)
 
 Aproximate_lin_sys_A = np.array([[sum([xi ** (i + j) for xi in Aproximate_data_x])
                                   for j in range(polinomial_power + 1)]
